@@ -4,10 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/patrickmn/go-cache"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
+)
+
+const (
+	streamCachePrefix = "stream cache for :"
 )
 
 type Arch struct {
@@ -59,16 +64,33 @@ type Stream struct {
 }
 
 type Resolver struct {
-	cli *http.Client
+	cli   *http.Client
+	cache *cache.Cache
 }
 
 func New() Resolver {
 	return Resolver{
-		cli: &http.Client{Timeout: 30 * time.Second},
+		cli:   &http.Client{Timeout: 30 * time.Second},
+		cache: cache.New(5*time.Minute, 10*time.Minute),
 	}
 }
 
 func (r Resolver) Resolve(ctx context.Context, stream string) (*Stream, error) {
+	key := streamCachePrefix + stream
+	cached, found := r.cache.Get(key)
+	if found {
+		return cached.(*Stream), nil
+	}
+
+	s, err := r.resolve(ctx, stream)
+	if err != nil {
+		return nil, err
+	}
+	r.cache.Set(key, s, cache.DefaultExpiration)
+	return s, nil
+}
+
+func (r Resolver) resolve(ctx context.Context, stream string) (*Stream, error) {
 	u := &url.URL{
 		Scheme: "https",
 		Host:   "builds.coreos.fedoraproject.org",
@@ -80,7 +102,6 @@ func (r Resolver) Resolve(ctx context.Context, stream string) (*Stream, error) {
 	}
 	req = *req.WithContext(ctx)
 
-	// TODO(mcsaucy): cache this lookup
 	resp, err := r.cli.Do(&req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch %v: %w", u, err)
