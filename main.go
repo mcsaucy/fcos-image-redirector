@@ -29,6 +29,7 @@ func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	frmt := matches[3]
 	art := matches[4]
 
+	sha256 := (r.URL.Query()["sha256"] != nil)
 	peek := (r.URL.Query()["peek"] != nil)
 	sig := (r.URL.Query()["sig"] != nil)
 
@@ -43,6 +44,11 @@ func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	res := s.Architectures[arch].Artifacts[plat].Formats[frmt][art]
 	if res == nil {
 		w.WriteHeader(http.StatusNotFound)
+		return
+	}
+
+	if sha256 {
+		fmt.Fprintf(w, "%v\n", res.Sha256)
 		return
 	}
 
