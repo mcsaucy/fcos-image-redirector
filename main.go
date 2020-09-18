@@ -14,15 +14,6 @@ var (
 )
 
 func artifacts(w http.ResponseWriter, r *http.Request) {
-	// TODO(mcsaucy): cache this between runs.
-	s, err := streams.New().Resolve(context.Background(), "stable")
-	if err != nil {
-		log.Print(err)
-		fmt.Fprintf(w, "failed to resolve stream: %v", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-
 	// TODO(mcsaucy): find a sexier way to do this?
 	matches := artifactsParser.FindStringSubmatch(r.URL.Path)
 	if len(matches) != 5 { // one per fragment + the whole string match
@@ -33,6 +24,15 @@ func artifacts(w http.ResponseWriter, r *http.Request) {
 	plat := matches[2]
 	frmt := matches[3]
 	art := matches[4]
+
+	// TODO(mcsaucy): cache this between runs.
+	s, err := streams.New().Resolve(context.Background(), "stable")
+	if err != nil {
+		log.Print(err)
+		fmt.Fprintf(w, "failed to resolve stream: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	res := s.Architectures[arch].Artifacts[plat].Formats[frmt][art]
 	if res == nil {
