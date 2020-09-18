@@ -39,7 +39,7 @@ type StreamMetadata struct {
 	LastModified string `json:"last-modified"`
 }
 
-type Formats map[string]map[string]Resource
+type Formats map[string]map[string]*Resource
 
 type Artifact struct {
 	Release string `json:"release"`
