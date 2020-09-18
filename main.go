@@ -10,10 +10,10 @@ import (
 )
 
 var (
-	artifactsParser = regexp.MustCompile(`x86_64/artifacts/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)$`)
+	artifactsParser = regexp.MustCompile(`artifacts/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)$`)
 )
 
-func x86_64Artifacts(w http.ResponseWriter, r *http.Request) {
+func artifacts(w http.ResponseWriter, r *http.Request) {
 	// TODO(mcsaucy): cache this between runs.
 	s, err := streams.New().Resolve(context.Background(), "stable")
 	if err != nil {
@@ -25,15 +25,16 @@ func x86_64Artifacts(w http.ResponseWriter, r *http.Request) {
 
 	// TODO(mcsaucy): find a sexier way to do this?
 	matches := artifactsParser.FindStringSubmatch(r.URL.Path)
-	if len(matches) != 4 { // one per fragment + the whole string match
+	if len(matches) != 5 { // one per fragment + the whole string match
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	platform := matches[1]
-	format := matches[2]
-	artifact := matches[3]
+	arch := matches[1]
+	plat := matches[2]
+	frmt := matches[3]
+	art := matches[4]
 
-	res := s.Architectures["x86_64"].Artifacts[platform].Formats[format][artifact]
+	res := s.Architectures[arch].Artifacts[plat].Formats[frmt][art]
 	if res == nil {
 		w.WriteHeader(http.StatusNotFound)
 		return
@@ -47,6 +48,6 @@ func x86_64Artifacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/x86_64/artifacts/", x86_64Artifacts)
+	http.HandleFunc("/artifacts/", artifacts)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
