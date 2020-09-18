@@ -13,7 +13,11 @@ var (
 	artifactsParser = regexp.MustCompile(`artifacts/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)$`)
 )
 
-func artifacts(w http.ResponseWriter, r *http.Request) {
+type server struct {
+	streams.Resolver
+}
+
+func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	// TODO(mcsaucy): find a sexier way to do this?
 	matches := artifactsParser.FindStringSubmatch(r.URL.Path)
 	if len(matches) != 5 { // one per fragment + the whole string match
@@ -28,8 +32,7 @@ func artifacts(w http.ResponseWriter, r *http.Request) {
 	peek := (r.URL.Query()["peek"] != nil)
 	sig := (r.URL.Query()["sig"] != nil)
 
-	// TODO(mcsaucy): cache this between runs.
-	s, err := streams.New().Resolve(context.Background(), "stable")
+	s, err := svr.Resolve(context.Background(), "stable")
 	if err != nil {
 		log.Print(err)
 		fmt.Fprintf(w, "failed to resolve stream: %v", err)
@@ -56,6 +59,7 @@ func artifacts(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/artifacts/", artifacts)
+	svr := server{streams.New()}
+	http.HandleFunc("/artifacts/", svr.artifacts)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

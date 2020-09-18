@@ -80,6 +80,7 @@ func (r Resolver) Resolve(ctx context.Context, stream string) (*Stream, error) {
 	}
 	req = *req.WithContext(ctx)
 
+	// TODO(mcsaucy): cache this lookup
 	resp, err := r.cli.Do(&req)
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch %v: %w", u, err)
