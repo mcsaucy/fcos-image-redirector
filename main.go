@@ -25,6 +25,9 @@ func artifacts(w http.ResponseWriter, r *http.Request) {
 	frmt := matches[3]
 	art := matches[4]
 
+	peek := (r.URL.Query()["peek"] != nil)
+	sig := (r.URL.Query()["sig"] != nil)
+
 	// TODO(mcsaucy): cache this between runs.
 	s, err := streams.New().Resolve(context.Background(), "stable")
 	if err != nil {
@@ -40,11 +43,16 @@ func artifacts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TODO(mcsaucy): have this redirect once we have a param to prevent that.
-	// This present behavior is useful for development and while we need this
-	// to redirect, I don't want my cURL invocation pulling down megabytes of
-	// garbage each test.
-	fmt.Fprintf(w, "%v\n", res.Location)
+	tgt := res.Location
+	if sig {
+		tgt = res.Signature
+	}
+
+	if peek {
+		fmt.Fprintf(w, "%v\n", tgt)
+		return
+	}
+	http.Redirect(w, r, tgt, http.StatusFound)
 }
 
 func main() {
