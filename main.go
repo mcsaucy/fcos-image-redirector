@@ -6,11 +6,7 @@ import (
 	"github.com/mcsaucy/fcos-image-redirector/streams"
 	"log"
 	"net/http"
-	"regexp"
-)
-
-var (
-	artifactsParser = regexp.MustCompile(`artifacts/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)/([[:word:]]+)$`)
+	"strings"
 )
 
 type server struct {
@@ -18,20 +14,24 @@ type server struct {
 }
 
 func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
-	// TODO(mcsaucy): find a sexier way to do this?
-	matches := artifactsParser.FindStringSubmatch(r.URL.Path)
-	if len(matches) != 5 { // one per fragment + the whole string match
+	u := r.URL
+	fragments := strings.Split(u.Path, "/")
+	// e.g. /artifacts/x86_64/metal/pxe/kernel
+	if len(fragments) != 6 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	arch := matches[1]
-	plat := matches[2]
-	frmt := matches[3]
-	art := matches[4]
+	// fragments[0] == ""
+	// fragments[1] == "artifacts"
+	arch := fragments[2]
+	plat := fragments[3]
+	frmt := fragments[4]
+	art := fragments[5]
 
-	sha256 := (r.URL.Query()["sha256"] != nil)
-	peek := (r.URL.Query()["peek"] != nil)
-	sig := (r.URL.Query()["sig"] != nil)
+	q := u.Query()
+	sha256 := (q["sha256"] != nil)
+	peek := (q["peek"] != nil)
+	sig := (q["sig"] != nil)
 
 	s, err := svr.Resolve(context.Background(), "stable")
 	if err != nil {
