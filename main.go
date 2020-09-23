@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"fcos-image-redirector/streams"
 	"fmt"
+	"github.com/mcsaucy/fcos-image-redirector/streams"
 	"log"
 	"net/http"
 	"regexp"
