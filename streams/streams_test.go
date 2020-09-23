@@ -44,7 +44,8 @@ func TestStreamsResolution(t *testing.T) {
 		}
 	})
 
-	sut := Resolver{cli: cli}
+	sut := New()
+	sut.cli = cli
 	strm, err := sut.Resolve(context.Background(), "test")
 	if err != nil {
 		t.Fatalf("Resolve(stable) err = %v; want nil", err)
