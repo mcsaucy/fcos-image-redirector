@@ -17,7 +17,7 @@ func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	u := r.URL
 	fragments := strings.Split(u.Path, "/")
 	// e.g. /stable/artifacts/x86_64/metal/pxe/kernel
-	if len(fragments) != 6 {
+	if len(fragments) != 7 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
