@@ -25,25 +25,31 @@ We should be able to redirect to any location within the
 "architectures/\*/artifacts" structure of the [streams JSON
 blob](https://builds.coreos.fedoraproject.org/streams/stable.json).
 
+We support the "stable", "testing", and "next" streams (which at the time of
+writing is all of them).
+
+The general path structure is
+`$STREAM/artifacts/$ARCH/$PLATFORM/$FORMAT/$ARTIFACT?$OPTIONS`.
+
 ### Basic lookups
-Example: `/artifacts/x86_64/metal/pxe/kernel`
+Example: `/stable/artifacts/x86_64/metal/pxe/kernel`
 
 This just redirects to the `location` for that resource in the streams JSON.
 
 ### Peeking
-Example: `/artifacts/x86_64/metal/pxe/kernel?peek`
+Example: `/stable/artifacts/x86_64/metal/pxe/kernel?peek`
 
 This doesn't redirect. Instead of redirecting to a URL, we write it to the
 response body.
 
 ### Signature fetching
-Example: `/artifacts/x86_64/metal/pxe/kernel?sig`
+Example: `/stable/artifacts/x86_64/metal/pxe/kernel?sig`
 
 Redirects to the `.sig` file for the resource. This can also be used with
 `?peek`.
 
 ### Digest fetching
-Example: `/artifacts/x86_64/metal/pxe/kernel?sha256`
+Example: `/stable/artifacts/x86_64/metal/pxe/kernel?sha256`
 
 Writes the SHA256 digest for the resource (as stored in the streams blob) in
 the response body. There's no redirection here.

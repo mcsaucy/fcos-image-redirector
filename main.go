@@ -16,24 +16,25 @@ type server struct {
 func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	u := r.URL
 	fragments := strings.Split(u.Path, "/")
-	// e.g. /artifacts/x86_64/metal/pxe/kernel
+	// e.g. /stable/artifacts/x86_64/metal/pxe/kernel
 	if len(fragments) != 6 {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	// fragments[0] == ""
-	// fragments[1] == "artifacts"
-	arch := fragments[2]
-	plat := fragments[3]
-	frmt := fragments[4]
-	art := fragments[5]
+	strm := fragments[1]
+	// fragments[2] == "artifacts"
+	arch := fragments[3]
+	plat := fragments[4]
+	frmt := fragments[5]
+	art := fragments[6]
 
 	q := u.Query()
 	sha256 := (q["sha256"] != nil)
 	peek := (q["peek"] != nil)
 	sig := (q["sig"] != nil)
 
-	s, err := svr.Resolve(context.Background(), "stable")
+	s, err := svr.Resolve(context.Background(), strm)
 	if err != nil {
 		log.Print(err)
 		fmt.Fprintf(w, "failed to resolve stream: %v", err)
@@ -75,7 +76,9 @@ func gohome(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	svr := server{streams.New()}
-	http.HandleFunc("/artifacts/", svr.artifacts)
+	http.HandleFunc("/stable/artifacts/", svr.artifacts)
+	http.HandleFunc("/testing/artifacts/", svr.artifacts)
+	http.HandleFunc("/next/artifacts/", svr.artifacts)
 	http.HandleFunc("/", gohome)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
