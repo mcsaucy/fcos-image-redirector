@@ -64,8 +64,18 @@ func (svr *server) artifacts(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, tgt, http.StatusFound)
 }
 
+func gohome(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
+	http.Redirect(w, r, "https://github.com/mcsaucy/fcos-image-redirector", http.StatusFound)
+}
+
 func main() {
+
 	svr := server{streams.New()}
 	http.HandleFunc("/artifacts/", svr.artifacts)
+	http.HandleFunc("/", gohome)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
