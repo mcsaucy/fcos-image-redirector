@@ -6,7 +6,9 @@ official page](https://getfedora.org/coreos?stream=stable) instead.
 details explaining why you should use the official approach.
 
 Trying to find a stable URL you can hit to pull down the most up-to-date image
-(for example via iPXE)? This may be what you want.
+(for example via iPXE)? This may be what you want. Hosted at
+`latest-fcos.herokuapp.com`, e.g.
+https://latest-fcos-herokuapp.com/stable/artifacts/x86_64/metal/pxe/kernel.
 
 ## How it works
 
