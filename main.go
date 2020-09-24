@@ -6,6 +6,7 @@ import (
 	"github.com/mcsaucy/fcos-image-redirector/streams"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 )
 
@@ -80,5 +81,10 @@ func main() {
 	http.HandleFunc("/testing/artifacts/", svr.artifacts)
 	http.HandleFunc("/next/artifacts/", svr.artifacts)
 	http.HandleFunc("/", gohome)
-	log.Fatal(http.ListenAndServe(":8080", nil))
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
