@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	streamCachePrefix = "stream cache for :"
+	streamCachePrefix = "stream cache for: "
 )
 
 type Arch struct {
